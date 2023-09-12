@@ -11,7 +11,9 @@ export function getDebt({
   userId: User["id"];
 }) {
   return prisma.debt.findFirst({
-    select: { id: true, amount: true, title: true },
+    select: { id: true, amount: true, title: true
+      , debtors: true
+    },
     where: { id, userId },
   });
 }
@@ -44,6 +46,22 @@ export function createDebt({
   });
 }
 
+export function addDebtor({
+  id,
+  userId,
+  newDebtor
+}: Pick<Debt, "id"> & { userId: User["id"] } & { newDebtor: string } ) {
+  // const debt = getDebt({id, userId})
+  return prisma.debt.update({
+    where: { id },
+    data: {
+      debtors: {
+        push: newDebtor
+      }
+    }
+  });
+}
+
 export function deleteDebt({
   id,
   userId,
@@ -52,3 +70,4 @@ export function deleteDebt({
     where: { id, userId },
   });
 }
+

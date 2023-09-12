@@ -1,14 +1,14 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
-  Form,
+  // Form,
   isRouteErrorResponse,
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
-import { deleteDebt, getDebt } from "~/models/debt.server";
+import { getDebt } from "~/models/debt.server";
 import { requireUserId } from "~/session.server";
 
 export const loader = async ({ params, request }: LoaderArgs) => {
@@ -23,30 +23,49 @@ export const loader = async ({ params, request }: LoaderArgs) => {
 };
 
 export const action = async ({ params, request }: ActionArgs) => {
-  const userId = await requireUserId(request);
+  // const userId = await requireUserId(request);
   invariant(params.debtId, "debtId not found");
 
-  await deleteDebt({ id: params.debtId, userId });
+  // await deleteDebt({ id: params.debtId, userId });
 
   return redirect("/debts");
 };
 
 export default function DebtDetailsPage() {
+  console.log("debts.debtId loading")
   const data = useLoaderData<typeof loader>();
+
+  const urlAddDebtor = `/debts/${data.debt.id}/debtor`
 
   return (
     <div>
       <h3 className="text-2xl font-bold">{data.debt.title}</h3>
-      <p className="py-6">{data.debt.amount}</p>
+      <p className="py-6">Amount: {data.debt.amount}</p>
+      
+      <p className="py-6">
+        Debtors: {
+          data.debt.debtors ? 
+            data.debt.debtors.join(", ") 
+            : 
+            "No yet"
+        } 
+        {" "}
+        <a
+          href={urlAddDebtor}
+        >
+          (click to add)
+        </a>
+      </p>
+
       <hr className="my-4" />
-      <Form method="post">
+      {/* <Form method="post">
         <button
           type="submit"
           className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
         >
           Delete
         </button>
-      </Form>
+      </Form> */}
     </div>
   );
 }
