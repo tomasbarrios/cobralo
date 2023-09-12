@@ -73,8 +73,9 @@ export default function DebtDetailsPage() {
         Done, go back to Debt
       </a>
       <p className="py-6">{data.debt.amount}</p>
+      
+      <h3 className="text-xl font-bold">List of friends in debt</h3>
       <p className="py-6 c-list">
-        <h3 className="text-xl font-bold">List of friends in debt</h3>
         {data.debt.debtors.length > 0 && data.debt.debtors.join(", ")}
       </p>
       <p>Anyone not in the list yet?</p>

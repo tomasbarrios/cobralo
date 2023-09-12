@@ -18,6 +18,17 @@ export function getDebt({
   });
 }
 
+export function getDebtPublic({
+  id,
+}: Pick<Debt, "id">) {
+  return prisma.debt.findFirst({
+    select: { id: true, amount: true, title: true
+      , debtors: true
+    },
+    where: { id },
+  });
+}
+
 export function getDebtListItems({ userId }: { userId: User["id"] }) {
   return prisma.debt.findMany({
     where: { userId },
@@ -61,6 +72,49 @@ export function addDebtor({
     }
   });
 }
+
+/**
+ * everytime A anonymous user confirms
+ * a new entry will be added to the `debtors` list. 
+ * 
+ * The el element is a serialize json with this structure
+ * {
+ *  debtor: "xxxx"
+ *  amount: "some valid number"
+ * }
+ * This regsitry will represent the intention
+ * from the person doing this anonymously
+ * 
+ * - Validates that the debtor is registered in the valid debtors
+ *  
+ * @returns promise
+ **/
+export async function addDebtorConfirmation({
+  id,
+  unsafelyDeclaredDebtor,
+  amount,
+}: Pick<Debt, "id"> & { unsafelyDeclaredDebtor: string, amount: string } ) {
+  
+  const debt = await getDebtPublic({id})
+  if(!debt || !unsafelyDeclaredDebtor || !debt?.debtors.includes(unsafelyDeclaredDebtor)) {
+    throw new Error("Could not add debtor")
+  }
+
+  const text = JSON.stringify({
+    debtor: unsafelyDeclaredDebtor,
+    amount
+  })
+  return prisma.debt.update({
+    where: { id },
+    data: {
+      debtors: {
+        push: text
+      }
+    }
+  });
+}
+
+
 
 export function deleteDebt({
   id,
