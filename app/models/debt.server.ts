@@ -21,11 +21,14 @@ export function getDebt({
 export function getDebtPublic({
   id,
 }: Pick<Debt, "id">) {
-  return prisma.debt.findFirst({
+  return prisma.debt.findUniqueOrThrow({
     select: { id: true, amount: true, title: true
       , debtors: true
+      , createdAt: true
+      , user: true
     },
     where: { id },
+    // include: { user: true },
   });
 }
 

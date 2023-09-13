@@ -50,7 +50,11 @@ export const action = async ({ params, request }: ActionArgs) => {
     );
   }
 
-  await addDebtorConfirmation({ id: params.debtId, unsafelyDeclaredDebtor: debtor, amount: amount });
+  await addDebtorConfirmation({
+    id: params.debtId,
+    unsafelyDeclaredDebtor: debtor,
+    amount: amount,
+  });
 
   // return json({ errors: {}})
   return redirect("/p/pay/" + params.debtId + "");
@@ -69,68 +73,88 @@ export default function DebtDetailsPage() {
       debtorRef.current?.focus();
     } else if (actionData?.errors?.amount) {
       amountRef.current?.focus();
-    } 
+    }
   }, [actionData]);
 
-  const urlBack = `/debts/${data.debt.id}`;
+  // const urlBack = `/debts/${data.debt.id}`;
 
-  const amountAcceptedAsDebt = 0;
+  // const amountAcceptedAsDebt = 0;
 
-  const debtorsToChoose = data.debt.debtors
+  const debtorsToChoose = data.debt.debtors;
 
-  const handleDebtorChoosing = ({name}: {name: string}) => {
+  const handleDebtorChoosing = ({ name }: { name: string }) => {
     // console.log("CLICK!!! ", name)
     if (debtorRef.current) {
-      debtorRef.current.value = name
+      debtorRef.current.value = name;
     }
-    return "OK"
+    return "OK";
+  };
+
+  const notJSON = (str: string) => {
+    try {
+      const res = JSON.parse(str)
+      console.log({res})
+      return false
+    } catch(err) {
+      return true
+    }
   }
 
   return (
     <div style={{ position: "relative" }}>
-      <h1 className="text-3xl font-bold">
-        Aclaremos las cuentas mai friend
-      </h1>{" "}
-      to
-      <h3 className="text-2xl font-bold">{data.debt.title}</h3>
-      
-      <p className="py-6">{data.debt.amount}</p>
-      <p className="py-6">{
-        debtorsToChoose.map(debtorName => {
-          return (
-            <button 
-            className="rounded px-4 py-2 border hover:bg-blue-600 focus:bg-blue-400"
-            key={`clickon${debtorName}`} onClick={() => handleDebtorChoosing({name: debtorName})}>
-              I am {debtorName}</button>
-          )
-        })
-      }</p>
-
-      <h3 className="text-xl font-bold">List of friends in debt</h3>
-      <p className="py-6 c-list">
-        {data.debt.debtors.length > 0 && data.debt.debtors.join(", ")}
+      <h1 className="text-3xl font-bold">Lets clear our debt</h1> <p>about</p>
+      <h2 className="text-2xl font-bold">{data.debt.title}</h2>
+      <p className="py-2">
+        {data.debt.user.email} wants to clear a debt with you
       </p>
-      <p>Anyone not in the list yet?</p>
-      <hr className="my-4" />
+      <div className="mt-4">
+        <h3 className="py-2 text-xl font-bold">
+          1. Check that the debt is correct
+        </h3>
+        <p className="py-2">
+          <b>Total Amount</b>: {data.debt.amount} (NOT YOUR DEBT)
+        </p>
+        <p className="py-2">
+          <b>Date</b>: {data.debt.createdAt}
+        </p>
+      </div>
+
+      <div className="mt-4">
+        <h3 className="py-2 text-xl font-bold">2. Select and declare WHO YOU ARE</h3>
+        <p className="py-6">
+          {debtorsToChoose.filter(notJSON).map((debtorName) => {
+            return (
+              <button
+                className="rounded px-4 py-2 border hover:bg-blue-600 focus:bg-blue-400"
+                key={`button-clickon-${debtorName}`}
+                onClick={() => handleDebtorChoosing({ name: debtorName })}
+              >
+                I am {debtorName}
+              </button>
+            );
+          })}
+        </p>
+      </div>
+      
       <Form method="post">
         <div>
           <input
-              ref={debtorRef}
-              type="hidden"
-              name="debtor"
-              className="flex-1 rounded-md border-2 border-blue-500 px-3 text-lg leading-loose"
-              aria-invalid={actionData?.errors?.debtor ? true : undefined}
-              aria-errormessage={
-                actionData?.errors?.debtor ? "debtor-error" : undefined
-              }
-            />
+            ref={debtorRef}
+            type="hidden"
+            name="debtor"
+            className="flex-1 rounded-md border-2 border-blue-500 px-3 text-lg leading-loose"
+            aria-invalid={actionData?.errors?.debtor ? true : undefined}
+            aria-errormessage={
+              actionData?.errors?.debtor ? "debtor-error" : undefined
+            }
+          />
           {actionData?.errors?.debtor ? (
             <div className="pt-1 text-red-700" id="debtor-error">
               {actionData.errors.debtor}
             </div>
           ) : null}
           <label className="flex w-full flex-col gap-1">
-            <span>Amount (Total owed)</span>
+            <span>Amount (How much do YOU OWE)</span>
             <input
               ref={amountRef}
               name="amount"
@@ -152,15 +176,9 @@ export default function DebtDetailsPage() {
           type="submit"
           className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
         >
-          Add
+          Accept
         </button>
       </Form>
-      <a
-        href={urlBack}
-        className=""
-      >
-        Done, I accept my debt of $ {amountAcceptedAsDebt}
-      </a>
     </div>
   );
 }

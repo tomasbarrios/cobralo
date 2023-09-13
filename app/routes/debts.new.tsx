@@ -56,11 +56,14 @@ export default function NewDebtPage() {
       }}
     >
       <div>
+        <h1 className="text-3xl font-bold mb-4">New Debt</h1>
+        
         <label className="flex w-full flex-col gap-1">
           <span>Title: </span>
           <input
             ref={titleRef}
             name="title"
+            defaultValue={(new Date()).toUTCString()}
             className="flex-1 rounded-md border-2 border-blue-500 px-3 text-lg leading-loose"
             aria-invalid={actionData?.errors?.title ? true : undefined}
             aria-errormessage={
