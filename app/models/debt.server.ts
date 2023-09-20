@@ -76,6 +76,21 @@ export function addDebtor({
   });
 }
 
+export function addReminder({
+  id,
+  reminderDate
+}: Pick<Debt, "id"> & { userId: User["id"] } & { reminderDate: Date } ) {
+  // const debt = getDebt({id, userId})
+  return prisma.reminder.create({
+    where: { id },
+    data: {
+      reminder: {
+        push: newDebtor
+      }
+    }
+  });
+}
+
 /**
  * everytime A anonymous user confirms
  * a new entry will be added to the `debtors` list. 

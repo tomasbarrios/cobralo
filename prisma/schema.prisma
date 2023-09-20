@@ -50,4 +50,33 @@ model Debt {
   userId String
 
   debtors String[]
+  reminders Reminder[]
+
+  sentEmails SentEmail[]
+}
+
+model Reminder {
+  id                String @id @default(cuid())
+  notificationDate  DateTime
+  
+  debt   Debt   @relation(fields: [debtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  debtId String
+}
+
+model SentEmail {
+  id      String @id @default(cuid())
+
+  provider    String
+  providerId  String @default("")
+
+  to          String
+  from        String
+  subject     String
+  body        String
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  debt   Debt   @relation(fields: [debtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  debtId String
 }

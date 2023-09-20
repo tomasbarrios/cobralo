@@ -40,6 +40,22 @@ async function seed() {
     },
   });
 
+  const d = await prisma.debt.create({
+    data: {
+      userId: user.id,
+      title: "",
+      amount: "100",
+      debtors: ["yo(tom)","max"]    
+    }
+  })
+
+  await prisma.reminder.create({
+    data: {
+      notificationDate: new Date().toISOString(),
+      debtId: d.id,
+    }
+  })
+
   console.log(`Database has been seeded. 🌱`);
 }
 
