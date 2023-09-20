@@ -10,14 +10,16 @@ import {
 import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
 
-import { addDebtor, getDebt } from "~/models/debt.server";
+import { addReminder, getDebtAndReminders } from "~/models/debt.server";
 import { requireUserId } from "~/session.server";
+
+import { showDate } from "~/utils/date";
 
 export const loader = async ({ params, request }: LoaderArgs) => {
   const userId = await requireUserId(request);
   invariant(params.debtId, "debtId not found");
 
-  const debt = await getDebt({ id: params.debtId, userId });
+  const debt = await getDebtAndReminders({ id: params.debtId, userId });
   if (!debt) {
     throw new Response("Not Found", { status: 404 });
   }
@@ -25,22 +27,24 @@ export const loader = async ({ params, request }: LoaderArgs) => {
 };
 
 export const action = async ({ params, request }: ActionArgs) => {
-  const userId = await requireUserId(request);
+  
   invariant(params.debtId, "debtId not found");
 
   const formData = await request.formData();
-  const debtor = formData.get("dueDate");
+  const remindDate = formData.get("remindDate");
 
-  if (typeof debtor !== "string" || debtor.length === 0) {
+  if (typeof remindDate !== "string" || remindDate.length === 0) {
     return json(
-      { errors: { amount: null, title: "Debtor is required" } },
+      { errors: { amount: null, title: "Reminder is required" } },
       { status: 400 },
     );
   }
 
-  await addDebtor({ id: params.debtId, userId, newDebtor: debtor });
+  // FIXME, secure this db action by user role
+  // const userId = await requireUserId(request);
+  await addReminder({ id: params.debtId, remindDate });
 
-  return redirect("/debts/" + params.debtId + "/debtor");
+  return redirect("/debts/" + params.debtId + "/reminder");
 };
 
 export default function DebtDetailsPage() {
@@ -48,11 +52,11 @@ export default function DebtDetailsPage() {
   const data = useLoaderData<typeof loader>();
 
   const actionData = useActionData<typeof action>();
-  const debtorRef = useRef<HTMLInputElement>(null);
+  const remindDateRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (actionData?.errors?.title) {
-      debtorRef.current?.focus();
+      remindDateRef.current?.focus();
     }
   }, [actionData]);
 
@@ -61,7 +65,7 @@ export default function DebtDetailsPage() {
   return (
     <div style={{ position: "relative" }}>
       <h1 className="text-3xl font-bold">
-        Add a <i>friend</i>
+        Add a <i>reminder</i>
       </h1>{" "}
       to
       <h3 className="text-2xl font-bold">{data.debt.title}</h3>
@@ -74,19 +78,24 @@ export default function DebtDetailsPage() {
       </a>
       <p className="py-6">{data.debt.amount}</p>
       
-      <h3 className="text-xl font-bold">List of friends in debt</h3>
-      <p className="py-6 c-list">
-        {data.debt.debtors.length > 0 && data.debt.debtors.join(", ")}
-      </p>
-      <p>Anyone not in the list yet?</p>
+      <h3 className="text-xl font-bold">List of reminders</h3>
+      <ul className="py-6">
+        {data.debt.reminders.length > 0
+         && 
+         data.debt.reminders.map(d => 
+         (<li key={`reminder-${d.notificationDate}`}>
+           {showDate(new Date(d.notificationDate))}
+         </li>))
+        }
+      </ul>
       <hr className="my-4" />
       <Form method="post">
         <div>
           <label className="flex w-full flex-col gap-1">
-            <span>Debtor (name of one of the friends who ows you): </span>
+            <span>Reminder (date when you want it...): </span>
             <input
-              ref={debtorRef}
-              name="debtor"
+              ref={remindDateRef}
+              name="remindDate"
               className="flex-1 rounded-md border-2 border-blue-500 px-3 text-lg leading-loose"
               aria-invalid={actionData?.errors?.title ? true : undefined}
               aria-errormessage={
@@ -107,7 +116,17 @@ export default function DebtDetailsPage() {
         >
           Add
         </button>
+        next monday
+        in a week
+        in two weeks
+        every month first monday
+    
       </Form>
+
+      <a href="/reminder/new">
+        NOW
+      </a>
+
     </div>
   );
 }

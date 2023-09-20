@@ -18,6 +18,20 @@ export function getDebt({
   });
 }
 
+export function getDebtAndReminders({
+  id,
+  userId,
+}: Pick<Debt, "id"> & {
+  userId: User["id"];
+}) {
+  return prisma.debt.findFirst({
+    select: { id: true, amount: true, title: true
+      , debtors: true, reminders: true
+    },
+    where: { id, userId },
+  });
+}
+
 export function getDebtPublic({
   id,
 }: Pick<Debt, "id">) {
@@ -78,15 +92,18 @@ export function addDebtor({
 
 export function addReminder({
   id,
-  reminderDate
-}: Pick<Debt, "id"> & { userId: User["id"] } & { reminderDate: Date } ) {
+  remindDate
+}: Pick<Debt, "id"> & { remindDate: string } ) {
   // const debt = getDebt({id, userId})
+  const notificationDate = remindDate ? new Date(remindDate) : new Date().toISOString()
   return prisma.reminder.create({
-    where: { id },
     data: {
-      reminder: {
-        push: newDebtor
-      }
+      notificationDate,
+      debt: {
+        connect: {
+          id: id,
+        },
+      },
     }
   });
 }

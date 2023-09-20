@@ -36,7 +36,8 @@ export default function DebtDetailsPage() {
   const data = useLoaderData<typeof loader>();
 
   const urlAddDebtor = `/debts/${data.debt.id}/debtor`
-
+  const urlAddReminder = `/debts/${data.debt.id}/reminder`
+  
   return (
     <div>
       <h3 className="text-2xl font-bold">{data.debt.title}</h3>
@@ -52,6 +53,17 @@ export default function DebtDetailsPage() {
         {" "}
         <a
           href={urlAddDebtor}
+        >
+          (click to add)
+        </a>
+      </p>
+
+      <p className="py-6">
+        Reminders: 
+            "No yet"
+        {" "}
+        <a
+          href={urlAddReminder}
         >
           (click to add)
         </a>
