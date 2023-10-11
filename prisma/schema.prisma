@@ -51,8 +51,6 @@ model Debt {
 
   debtors String[]
   reminders Reminder[]
-
-  sentEmails SentEmail[]
 }
 
 model Reminder {
@@ -61,22 +59,23 @@ model Reminder {
   
   debt   Debt   @relation(fields: [debtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   debtId String
+
+  deliveryAttempts   DeliveryAttempt[]
 }
 
-model SentEmail {
+model DeliveryAttempt {
   id      String @id @default(cuid())
-
-  provider    String
-  providerId  String @default("")
 
   to          String
   from        String
   subject     String
   body        String
+
+  deliveryResult   String?
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  debt   Debt   @relation(fields: [debtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  debtId String
+  reminder Reminder @relation(fields: [reminderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reminderId String    @unique
 }
