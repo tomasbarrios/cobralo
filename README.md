@@ -7,7 +7,6 @@ Learn more about [Remix Stacks](https://remix.run/stacks).
 ```
 npx create-remix@latest --template remix-run/blues-stack
 ```
-
 ## What's in the stack
 
 - [Multi-region Fly app deployment](https://fly.io/docs/reference/scaling/) with [Docker](https://www.docker.com/)
