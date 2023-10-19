@@ -1,7 +1,7 @@
 app = "cobralo"
 kill_signal = "SIGINT"
 kill_timeout = 5
-processes = [ ]
+# processes = [ ]
 
 [env]
 PORT = "8080"
@@ -20,7 +20,7 @@ auto_rollback = true
 
 [[services]]
 internal_port = 8_080
-processes = [ "app" ]
+processes = [ "web" ]
 protocol = "tcp"
 script_checks = [ ]
 
@@ -53,3 +53,7 @@ script_checks = [ ]
   timeout = "2s"
   tls_skip_verify = false
   headers = { }
+
+[processes]
+  web = "npm start"
+  cron = "supercronic /myapp/crontab"
