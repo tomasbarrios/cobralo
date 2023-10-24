@@ -10,6 +10,8 @@ echo "Hello from cron task on $(date)"
 
 # NODE_ENV=production
 
-# node dist/initCreateDeliveryAttemptsPending.js
+# ts-node services/initCreateDeliveryAttemptsPending.ts
+
+npm run start:cron
 
 # npm run job:createPendingDelivery

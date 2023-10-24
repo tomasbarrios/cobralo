@@ -1,3 +1,16 @@
+# Current issues
+
+## 
+
+Attempting to deploy a cron so that pending scheduled emails are checked every minute
+
+# How to
+### ssh in a specific machine
+
+https://community.fly.io/t/ssh-and-logs-by-process-group-cli/8712
+
+----
+
 # Remix Blues Stack
 
 ![The Remix Blues Stack](https://repository-images.githubusercontent.com/461012689/37d5bd8b-fa9c-4ab0-893c-f0a199d5012d)

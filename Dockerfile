@@ -59,6 +59,10 @@ RUN npx prisma generate
 ADD . .
 RUN npm run build
 
+# CRON RELATED start
+RUN npm run build:cron
+# CRON RELATED end
+
 # Finally, build the production image with minimal footprint
 FROM base
 
@@ -70,6 +74,7 @@ COPY --from=build /myapp/node_modules/.prisma /myapp/node_modules/.prisma
 COPY --from=build /myapp/build /myapp/build
 COPY --from=build /myapp/public /myapp/public
 
+COPY --from=build /myapp/dist /myapp/dist
 COPY --from=build /myapp/crontab /myapp/crontab
 
 ADD . .
