@@ -1,5 +1,5 @@
 # base node image
-FROM node:16-bullseye-slim as base
+FROM node:18-bullseye-slim as base
 
 # set for base and all layer that inherit from it
 ENV NODE_ENV production
@@ -78,6 +78,7 @@ COPY --from=build /myapp/dist /myapp/dist
 COPY --from=build /myapp/crontab /myapp/crontab
 
 ADD . .
+
 
 RUN chmod +x /myapp/every_1min.sh
 RUN ls -lah /myapp

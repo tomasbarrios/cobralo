@@ -27,6 +27,7 @@ export const loader = async ({ params, request }: LoaderArgs) => {
 };
 
 export const action = async ({ params, request }: ActionArgs) => {
+  const userId = await requireUserId(request);
   
   invariant(params.debtId, "debtId not found");
 
@@ -42,7 +43,7 @@ export const action = async ({ params, request }: ActionArgs) => {
 
   // FIXME, secure this db action by user role
   // const userId = await requireUserId(request);
-  await addReminder({ id: params.debtId, remindDate });
+  await addReminder({ id: params.debtId, userId, remindDate });
 
   return redirect("/debts/" + params.debtId + "/reminder");
 };

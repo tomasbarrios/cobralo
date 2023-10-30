@@ -1,15 +1,49 @@
+
 # Current issues
 
-## 
+# Issues with TS and Resend
 
-Attempting to deploy a cron so that pending scheduled emails are checked every minute
+Seems not the only one
 
+https://github.com/search?q=repo%3Aresendlabs%2Fresend-node%20CreateEmailResponse&type=issues
+
+ https://stackoverflow.com/questions/18083389/ignore-typescript-errors-property-does-not-exist-on-value-of-type
+           
+
+[Tutorial: Run prisma studio in production](#tutorial-howto)
+
+## Cron
+
+- [x] Attempting to deploy a cron so that pending scheduled emails are checked every minute
+
+### Resend Errors
+
+ ``` {"message":"You have reached your daily email sending quota.","statusCode":429,"name":"daily_quota_exceeded"}```
 # How to
 ### ssh in a specific machine
 
 https://community.fly.io/t/ssh-and-logs-by-process-group-cli/8712
 
+---
+
+## Tutorial howto
+
+Tutorial: How to get a UI for prisma studio in your production site hosted in fly.io
+
+### You will need
+- Credentials: Make sure you have your credentials, this should be something like these
+`DATABASE_URL=postgres://<DATABASE_USERNAME>:<DATABASE_PASSWORD>@<DATABASE_FLYAPP_NAME>.flycast:5432/<DATABASE_NAME>?sslmode=disable`
+
+### Steps
+1. Enable a proxy that will connect to your production database
+`fly proxy 5678:5432 -a cobralo-db`
+`fly proxy LOCAL_PORT:REMOTE_PORT -a DATABASE_FLYAPP_NAME`
+
+2. Run prisma studio
+`DATABASE_URL=postgres://DATABASE_USERNAME:DATABASE_PASSWORD@DATABASE_FLYAPP_NAME.flycast:5432/DATABASE_NAME?sslmode=disable npx prisma studio`
+
 ----
+
 
 # Remix Blues Stack
 

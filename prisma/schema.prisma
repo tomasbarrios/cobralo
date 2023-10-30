@@ -56,6 +56,13 @@ model Debt {
 model Reminder {
   id                String @id @default(cuid())
   notificationDate  DateTime
+
+  to          String @default("ERROR_DEFAULT_MISSING_to")
+  from        String @default("ERROR_DEFAULT_MISSING_from")
+  subject     String @default("ERROR_DEFAULT_MISSING_subject")
+  body        String @default("ERROR_DEFAULT_MISSING_body")
+
+  template    String?
   
   debt   Debt   @relation(fields: [debtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   debtId String

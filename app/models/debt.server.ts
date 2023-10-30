@@ -90,15 +90,21 @@ export function addDebtor({
   });
 }
 
-export function addReminder({
+export async function addReminder({
   id,
-  remindDate
-}: Pick<Debt, "id"> & { remindDate: string } ) {
-  // const debt = getDebt({id, userId})
+  userId,
+  remindDate,
+}: Pick<Debt, "id"> & { userId: string} & { remindDate: string } ) {
+  // const debt = getDebt({id, userId}) 
   const notificationDate = remindDate ? new Date(remindDate) : new Date().toISOString()
+  const debt = await prisma.debt.findUnique({ where: { id }})
+  const user = await prisma.user.findUnique({ where: { id: userId }})
+  // debt?.debtors
   return prisma.reminder.create({
     data: {
       notificationDate,
+      to: debt?.debtors[0],
+      from: user?.email,
       debt: {
         connect: {
           id: id,

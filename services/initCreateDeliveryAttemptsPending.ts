@@ -1,11 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { getAllRemindersBeforeNow } from "./lib/reminders";
+import { getAllRemindersBeforeNow } from "./models/reminders";
 require("dotenv").config();
 
-/**
- * Resend deps
- */
-// import { Resend } from "resend";
 //import express, { Request, Response } from 'express';
 
 /**
@@ -37,9 +33,9 @@ async function main() {
       const res = await prisma.deliveryAttempt.create({
         data: {
           from: "Acme <onboarding@resend.dev>",
-          to: "tomasbarrios@protonmail.com",
-          subject: "Hello World",
-          body: "<strong>it works!</strong>",
+          to: r.to || "tomasbarrios@protonmail.com",
+          subject: r.subject || "Hello World",
+          body: r.body || "<strong>it works! Still needs a template, define one in ....</strong>",
           reminderId: r.id,
         },
       });
