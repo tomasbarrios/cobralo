@@ -2,8 +2,7 @@ import * as corn from "node-cron";
 
 export interface IScheduler {
   success: boolean;
-
-  error: Error;
+  error: undefined | Error
 }
 
 export abstract class Scheduler {

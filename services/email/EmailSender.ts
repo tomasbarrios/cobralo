@@ -1,4 +1,3 @@
-import { CreateEmailResponse } from "resend/build/src/emails/interfaces";
 import type { IScheduler } from "../scheduler/scheduler";
 import { Resend } from "resend";
 require("dotenv").config();
@@ -13,6 +12,7 @@ type Email = {
   body: string;
 };
 export const EmailSender = function ({ to, from, subject, body }: Email) {
+  console.log("EMAIL SENDER params", { to, from, subject, body })
   const sendEmail = async function() {
     let params = {
       from: "Acme <onboarding@resend.dev>",
@@ -30,13 +30,14 @@ export const EmailSender = function ({ to, from, subject, body }: Email) {
       };
     }
 
-    type ErrorR = CreateEmailResponse | {
-      message: string,
-      statusCode: string,
-      name: string
-    }
+    // type ErrorR = CreateEmailResponse | {
+    //   message: string,
+    //   statusCode: string,
+    //   name: string
+    // }
     try {
-      const data: ErrorR = await resend.emails.send(params);
+      console.log("Attempting delivery", { params })
+      const data = await resend.emails.send(params);
 
       let emailStatus: IScheduler = {
         success: false,
@@ -76,7 +77,7 @@ export const EmailSender = function ({ to, from, subject, body }: Email) {
       } else {
         emailStatus = {
           success: true,
-          error: new Error(),
+          error: undefined,
         };
       }
       return emailStatus;

@@ -32,7 +32,7 @@ async function main() {
     for (const r of reminders) {
       const res = await prisma.deliveryAttempt.create({
         data: {
-          from: "Acme <onboarding@resend.dev>",
+          from: r.from || "Acme <onboarding@resend.dev>",
           to: r.to || "tomasbarrios@protonmail.com",
           subject: r.subject || "Hello World",
           body: r.body || "<strong>it works! Still needs a template, define one in ....</strong>",

@@ -32,13 +32,16 @@ async function main() {
       
       const deliveryAttempts = await getAllEmailsPendingToBeSent();
 
-      const onSuccessFn = (id: string) => async ({success, error}: {success: boolean, error: Error}) => {
+      const onSuccessFn = (id: string) => async ({success, error}: {success: boolean, error: Error | undefined}) => {
         console.log("onSuccess!", {
           success,
           error
         })
-        
-        await updateDeliveryResult({id, deliveryResult: error.message})
+        if(error) {
+          await updateDeliveryResult({id, deliveryResult: error.message})
+        } else {
+          await updateDeliveryResult({id, deliveryResult: "SUCCESS"})
+        }
       }
       for(const da of deliveryAttempts) {
         const { id, from, to, subject, body } = da
