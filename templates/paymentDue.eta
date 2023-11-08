@@ -1,7 +1,11 @@
 Estimado <%= it.receiverName %>,
 
 
-Queremos recordarte que estamos esperando el pago de la factura <%= it.invoiceNumber %>, correspondiente a "<%= it.invoiceDescription %>" (<a href="<%= it.invoiceLink %>">ver factura</a>)
+Queremos recordarte que hemos emitido la factura <%= it.invoiceNumber %>, correspondiente a "<%= it.invoiceDescription %>" 
+
+Puedes ver el documento en el siguiente link 
+<%= it.invoiceLink %>
+
 
 Fecha Emisión: <%= it.invoiceDate %>
 

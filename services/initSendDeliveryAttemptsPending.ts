@@ -1,4 +1,5 @@
 import { EmailSender } from "./email/EmailSender";
+import type { EmailSenderResult } from "./email/EmailSender";
 import {
   getAllEmailsPendingToBeSent,
   updateDeliveryResult,
@@ -20,40 +21,25 @@ async function main() {
       async ({
         success,
         error,
-      }: {
-        success: boolean;
-        error: Error | undefined;
-      }) => {
+        result
+      }: EmailSenderResult) => {
         console.log("onSuccess!", {
           success,
           error,
+          result
         });
-        if (error) {
-          await updateDeliveryResult({ id, deliveryResult: error.message });
+        if (success && error === undefined) {
+          // Delivery OK; Happy path :)
+          await updateDeliveryResult({ id, hasDeliverySucceeded: true, deliveryResult: JSON.stringify(result) });
+        } else if (success && error !== undefined) {
+          // API responded OK, but could NOT DELIVER ; Happy path :S
+          await updateDeliveryResult({ id, hasDeliverySucceeded: false, deliveryResult: JSON.stringify(result) });
         } else {
-          await updateDeliveryResult({ id, deliveryResult: "SUCCESS" });
+          // Unexpected error!
+          console.error("UNEXPECTED ERROR", error)
+          await updateDeliveryResult({ id, hasDeliverySucceeded: false, deliveryResult: JSON.stringify(error) });
         }
       };
-
-    
-
-    // const templateRequiredKeys = [
-    //   // Receiver
-    //   "receiverName",
-      
-    //   // Debt
-    //   "invoiceNumber",
-    //   "invoiceDescription",
-    //   "invoiceDate",
-    //   "invoiceAmount",
-      
-    //   // Payment
-    //   "paymentDetails",
-      
-    //   // Sender
-    //   "senderName",
-    //   "senderSignature"
-    // ]
 
     const templateData = {
       "receiverName": "Pablo Spencer",
@@ -73,34 +59,23 @@ async function main() {
       "senderSignature": "Digital Craft SpA",
     }
 
-    // let htmlTemplate = "JUST A STRING TO TEST";
     const etaTemplate = render({ template: "paymentDue", data: templateData})
-    console.log({etaTemplate})
-
-    // const result = await fs.readFile("./templates/receipt.html", function (err: Error, html: string) {
-    //   if (err) {
-    //     throw err;
-    //   }
-    // console.log("DASDA", {html})
-
-    //   htmlTemplate = html;
-    //   return html
-    // });
-
-    // console.log("DASDA", {htmlTemplate, result})
+    // console.log({etaTemplate})
 
     for (const da of deliveryAttempts) {
       const { id, from, to, subject, body } = da;
-      const emailJob = await EmailSender(
+      const resultHandler = onSuccessFn(id)
+      const emailSendResult = await EmailSender(
         {
           from,
           to,
           subject,
-          body,
+          body: etaTemplate || body,
         },
-        { html: etaTemplate },
+        {}
+        // { text: etaTemplate, html: null },
       );
-      onSuccessFn(id)(emailJob);
+      resultHandler(emailSendResult);
     }
   }
 }

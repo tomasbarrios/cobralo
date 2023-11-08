@@ -13,14 +13,17 @@ export async function getAllEmailsPendingToBeSent() {
 
 export async function updateDeliveryResult({
   id,
+  hasDeliverySucceeded,
   deliveryResult
-}: Pick<DeliveryAttempt, "id" | "deliveryResult">) {
+}: Pick<DeliveryAttempt, "id" | "hasDeliverySucceeded" | "deliveryResult">) {
   return prisma.deliveryAttempt.update({
     where: {
       id
     },
     data: {
       deliveryResult,
+      deliveredAt: new Date(),
+      hasDeliverySucceeded
     }
   })
   
