@@ -11,7 +11,12 @@ type Email = {
   subject: string;
   body: string;
 };
-export const EmailSender = function ({ to, from, subject, body }: Email) {
+
+type Metadata = {
+  html: string
+}
+
+export const EmailSender = function ({ to, from, subject, body }: Email, metadata: Metadata) {
   console.log("EMAIL SENDER params", { to, from, subject, body })
   const sendEmail = async function() {
     let params = {
@@ -26,10 +31,11 @@ export const EmailSender = function ({ to, from, subject, body }: Email) {
         from: from,
         to: [to],
         subject: subject,
-        html: body,
+        html: metadata.html || body,
       };
     }
 
+    console.log("EMAIL SENDER FINAL PARAMS", {params})
     // type ErrorR = CreateEmailResponse | {
     //   message: string,
     //   statusCode: string,

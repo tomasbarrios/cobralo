@@ -1,0 +1,21 @@
+Estimado <%= it.receiverName %>,
+
+
+Queremos recordarte que estamos esperando el pago de la factura <%= it.invoiceNumber %>, correspondiente a "<%= it.invoiceDescription %>" (<a href="<%= it.invoiceLink %>">ver factura</a>)
+
+Fecha Emisión: <%= it.invoiceDate %>
+
+Monto: <%= it.invoiceAmount %>
+
+
+Muchas gracias por preferirnos.
+
+
+Puedes realizar el pago en la siguiente cuenta
+
+<%= it.paymentAccountDetails %>
+
+--------------------
+<%= it.senderName %>
+
+<%= it.senderSignature %>

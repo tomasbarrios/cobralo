@@ -1,4 +1,19 @@
 
+# Libraries
+
+node-cron: to be deleted, not used
+resend: only used in cron
+eta: templating library
+
+# Templates
+
+https://github.com/search?q=templates+email&type=repositories
+
+https://github.com/sendwithus/templates (THIS WE ARE USING... meou/receipt)
+https://github.com/mailgun/transactional-email-templates
+https://github.com/ColorlibHQ/email-templates/pulls
+https://github.com/sendgrid/email-templates
+
 # Current issues
 
 # Issues with TS and Resend
