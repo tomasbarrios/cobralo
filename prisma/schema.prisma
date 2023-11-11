@@ -51,16 +51,18 @@ model Debt {
 
   debtors String[]
   reminders Reminder[]
+
+  metadata String?
 }
 
 model Reminder {
   id                String @id @default(cuid())
   notificationDate  DateTime
 
-  to          String @default("ERROR_DEFAULT_MISSING_to")
-  from        String @default("ERROR_DEFAULT_MISSING_from")
-  subject     String @default("ERROR_DEFAULT_MISSING_subject")
-  body        String @default("ERROR_DEFAULT_MISSING_body")
+  to          String
+  from        String
+  subject     String
+  body        String
 
   template    String?
   

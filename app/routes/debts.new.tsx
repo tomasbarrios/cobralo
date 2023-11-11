@@ -12,22 +12,23 @@ export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const title = formData.get("title");
   const amount = formData.get("amount");
+  const metadata = formData.get("metadata");
 
   if (typeof title !== "string" || title.length === 0) {
     return json(
-      { errors: { amount: null, title: "Title is required" } },
+      { errors: { amount: null, title: "Title is required", metadata: null } },
       { status: 400 },
     );
   }
 
   if (typeof amount !== "string" || amount.length === 0) {
     return json(
-      { errors: { amount: "Amount is required", title: null } },
+      { errors: { amount: "Amount is required", title: null, metadata: null } },
       { status: 400 },
     );
   }
 
-  const debt = await createDebt({ amount, title, userId });
+  const debt = await createDebt({ amount, title, userId, metadata });
 
   return redirect(`/debts/${debt.id}`);
 };
@@ -36,6 +37,7 @@ export default function NewDebtPage() {
   const actionData = useActionData<typeof action>();
   const titleRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
+  const metadataRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (actionData?.errors?.title) {
@@ -94,6 +96,27 @@ export default function NewDebtPage() {
         {actionData?.errors?.amount ? (
           <div className="pt-1 text-red-700" id="amount-error">
             {actionData.errors.amount}
+          </div>
+        ) : null}
+      </div>
+
+      <div>
+        <label className="flex w-full flex-col gap-1">
+          <span>Metadata: </span>
+          <textarea
+            ref={metadataRef}
+            name="metadata"
+            rows={8}
+            className="w-full flex-1 rounded-md border-2 border-blue-500 px-3 py-2 text-lg leading-6"
+            aria-invalid={actionData?.errors?.metadata ? true : undefined}
+            aria-errormessage={
+              actionData?.errors?.metadata ? "metadata-error" : undefined
+            }
+          />
+        </label>
+        {actionData?.errors?.metadata ? (
+          <div className="pt-1 text-red-700" id="metadata-error">
+            {actionData.errors.metadata}
           </div>
         ) : null}
       </div>

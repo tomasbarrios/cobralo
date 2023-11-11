@@ -1,4 +1,5 @@
-import type { Debt, Reminder } from "@prisma/client";
+import type { Debt, Reminder, User } from "@prisma/client";
+import { formatDate } from "services/date/formatDate";
 
 import { prisma } from "~/db.server";
 
@@ -26,15 +27,25 @@ export function getReminderListItems({ debtId }: { debtId: Debt["id"] }) {
   });
 }
 
-export function createReminder({
+export async function createReminder({
   notificationDate,
+  body,
   debtId,
-}: Pick<Reminder, "notificationDate"> & {
-  debtId: Debt["id"];
-}) {
+  userId
+}: Pick<Reminder, "notificationDate" | "body"> & {
+  debtId: Debt["id"]
+} & { userId: User["id"] }) {
+  
+  const debt = await prisma.debt.findUnique({ where: { id: debtId }})
+  const user = await prisma.user.findUnique({ where: { id: userId }})
+
   return prisma.reminder.create({
     data: {
       notificationDate,
+      body,
+      subject: formatDate(new Date(notificationDate), null),
+      to: debt?.debtors[0],
+      from: user?.email,
       debt: {
         connect: {
           id: debtId,
@@ -45,17 +56,19 @@ export function createReminder({
 }
 
 export function addReminder({
-  id,
-  remindDate
-}: Pick<Reminder, "id"> & { remindDate: string } ) {
+  debtId,
+  notificationDate,
+  body
+}: Pick<Reminder, "body" | "notificationDate"> & { debtId: string } ) {
+  
   // const debt = getReminder({id, debtId})
-  const notificationDate = remindDate ? new Date(remindDate) : new Date().toISOString()
+  // const parsedDate = notificationDate ? new Date(notificationDate) : new Date().toISOString()
   return prisma.reminder.create({
     data: {
       notificationDate,
       debt: {
         connect: {
-          id: id,
+          id: debtId,
         },
       },
     }

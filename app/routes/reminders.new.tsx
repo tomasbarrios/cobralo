@@ -12,10 +12,18 @@ export const action = async ({ request }: ActionArgs) => {
 
   const formData = await request.formData();
   const notificationDate = formData.get("notificationDate");
+  const body = formData.get("body");
 
   if (typeof notificationDate !== "string" || notificationDate.length === 0) {
     return json(
-      { errors: { notificationDate: "Date is required" } },
+      { errors: { notificationDate: "Date is required", body: null } },
+      { status: 400 },
+    );
+  }
+
+  if (typeof body !== "string" || body.length === 0) {
+    return json(
+      { errors: { body: "Body is required", notificationDate: null } },
       { status: 400 },
     );
   }
@@ -34,10 +42,13 @@ export const action = async ({ request }: ActionArgs) => {
 export default function NewReminderPage() {
   const actionData = useActionData<typeof action>();
   const notificationDateRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (actionData?.errors?.notificationDate) {
       notificationDateRef.current?.focus();
+    } else if (actionData?.errors?.body) {
+      bodyRef.current?.focus();
     }
   }, [actionData]);
 
@@ -72,6 +83,27 @@ export default function NewReminderPage() {
         {actionData?.errors?.notificationDate ? (
           <div className="pt-1 text-red-700" id="notificationDate-error">
             {actionData.errors.notificationDate}
+          </div>
+        ) : null}
+      </div>
+
+      <div>
+        <label className="flex w-full flex-col gap-1">
+          <span>Body: </span>
+          <textarea
+            ref={bodyRef}
+            name="body"
+            rows={8}
+            className="w-full flex-1 rounded-md border-2 border-blue-500 px-3 py-2 text-lg leading-6"
+            aria-invalid={actionData?.errors?.body ? true : undefined}
+            aria-errormessage={
+              actionData?.errors?.body ? "body-error" : undefined
+            }
+          />
+        </label>
+        {actionData?.errors?.body ? (
+          <div className="pt-1 text-red-700" id="body-error">
+            {actionData.errors.body}
           </div>
         ) : null}
       </div>

@@ -57,31 +57,31 @@ export const EmailSender = async function (
       from: "Acme <onboarding@resend.dev>",
       to: ["tomasbarrios@protonmail.com"],
       reply_to: "tomas.barrios@gmail.com",
-      subject: "Hello World",
-      html: "<strong>it works!</strong>",
+      subject: "DEV" + subject,
+      html: body
     } : 
     {
       from: "Acme <onboarding@resend.dev>",
       to: ["tomasbarrios@protonmail.com"],
       reply_to: "tomas.barrios@gmail.com",
-      subject: "Hello World",
-      text: "it works in plain text",
+      subject: "DEV" + subject,
+      text: body,
     } 
     ;
 
     console.log("PROCESS", {process: process.env.NODE_ENV})
     if (process.env.NODE_ENV === "production") {
       params = metadata && metadata.html ? {
-        from: `Tomas Barrios <${from}>`,
-        to: [to],
+        from: `Tomas Barrios <pagos@digitalcraft.cl">`,
         reply_to: "tomas.barrios@gmail.com",
-        subject: "Factura Emitida pendiente de pago",
+        to: [to],
+        subject,
         html: metadata.html || body,
       } :  {
-        from: `Tomas Barrios <${from}>`,
+        from: `Tomas Barrios <pagos@digitalcraft.cl>`,
         reply_to: "tomas.barrios@gmail.com",
         to: [to],
-        subject: "Factura Emitida pendiente de pago",
+        subject,
         text: body,
       };
     }

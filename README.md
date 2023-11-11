@@ -6,6 +6,18 @@ resend: only used in cron
 eta: templating library
 
 # Templates
+Added metadata to Debt, which can be smt like this
+```
+receiverName: Pablo Spencer
+invoiceNumber: #6
+invoiceDescription: Mantencion 2020
+invoiceLink: https://drive.google.com/file/d/15t4HSWdEVU6zxhp5FCZF-GxHgpamMejH/view?usp=drive_link
+invoiceDate: 2023-11-8 12:00
+invoiceAmount: 780_845
+paymentAccountDetails: Datos de transferencia\n----------------------\nDigital Craft SpA, RUT 76.560.456-7\nCuenta Corriente 3477095052, Banco Estado\n
+senderName: Tomas Barrios
+senderSignature: Digital Craft SpA
+```
 
 https://github.com/search?q=templates+email&type=repositories
 

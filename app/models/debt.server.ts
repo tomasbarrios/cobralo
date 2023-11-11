@@ -26,7 +26,7 @@ export function getDebtAndReminders({
 }) {
   return prisma.debt.findFirst({
     select: { id: true, amount: true, title: true
-      , debtors: true, reminders: true
+      , debtors: true, reminders: true, metadata: true
     },
     where: { id, userId },
   });
@@ -57,14 +57,16 @@ export function getDebtListItems({ userId }: { userId: User["id"] }) {
 export function createDebt({
   amount,
   title,
+  metadata = null,
   userId,
-}: Pick<Debt, "amount" | "title"> & {
+}: Pick<Debt, "amount" | "title" | "metadata"> & {
   userId: User["id"];
 }) {
   return prisma.debt.create({
     data: {
       title,
       amount,
+      metadata,
       user: {
         connect: {
           id: userId,
@@ -93,16 +95,16 @@ export function addDebtor({
 export async function addReminder({
   id,
   userId,
-  remindDate,
-}: Pick<Debt, "id"> & { userId: string} & { remindDate: string } ) {
+  notificationDate,
+}: Pick<Debt, "id"> & { userId: string} & { notificationDate: string } ) {
   // const debt = getDebt({id, userId}) 
-  const notificationDate = remindDate ? new Date(remindDate) : new Date().toISOString()
+  // const notificationDate = notificationDate ? new Date(notificationDate) : new Date().toISOString()
   const debt = await prisma.debt.findUnique({ where: { id }})
   const user = await prisma.user.findUnique({ where: { id: userId }})
   // debt?.debtors
   return prisma.reminder.create({
     data: {
-      notificationDate,
+      notificationDate: new Date(notificationDate),
       to: debt?.debtors[0],
       from: user?.email,
       debt: {

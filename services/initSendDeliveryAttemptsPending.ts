@@ -41,40 +41,40 @@ async function main() {
         }
       };
 
-    const templateData = {
-      "receiverName": "Pablo Spencer",
+    // const templateData = {
+    //   "receiverName": "Pablo Spencer",
       
-      // Debt
-      "invoiceNumber": "#6",
-      "invoiceDescription": "Mantencion 2020",
-      "invoiceLink": "https://drive.google.com/file/d/15t4HSWdEVU6zxhp5FCZF-GxHgpamMejH/view?usp=drive_link",
-      "invoiceDate": formatDate(new Date("2023-11-8 12:00")),
-      "invoiceAmount": formatNumber(780_845),
+    //   // Debt
+    //   "invoiceNumber": "#6",
+    //   "invoiceDescription": "Mantencion 2020",
+    //   "invoiceLink": "https://drive.google.com/file/d/15t4HSWdEVU6zxhp5FCZF-GxHgpamMejH/view?usp=drive_link",
+    //   "invoiceDate": formatDate(new Date("2023-11-8 12:00")),
+    //   "invoiceAmount": formatNumber(780_845),
       
-      // Payment
-      "paymentAccountDetails": "Datos de transferencia\n----------------------\nDigital Craft SpA, RUT 76.560.456-7\nCuenta Corriente 3477095052, Banco Estado\n",
+    //   // Payment
+    //   "paymentAccountDetails": "Datos de transferencia\n----------------------\nDigital Craft SpA, RUT 76.560.456-7\nCuenta Corriente 3477095052, Banco Estado\n",
       
-      // Sender
-      "senderName": "Tomas Barrios",
-      "senderSignature": "Digital Craft SpA",
-    }
+    //   // Sender
+    //   "senderName": "Tomas Barrios",
+    //   "senderSignature": "Digital Craft SpA",
+    // }
 
-    const etaTemplate = render({ template: "paymentDue", data: templateData})
     // console.log({etaTemplate})
-
+    
     for (const da of deliveryAttempts) {
       const { id, from, to, subject, body } = da;
       const resultHandler = onSuccessFn(id)
+      const etaTemplate = render({ template: "paymentDue", data: body})
       const emailSendResult = await EmailSender(
         {
           from,
           to,
           subject,
-          body: etaTemplate || body,
+          body: body,
         },
         {}
         // { text: etaTemplate, html: null },
-      );
+        );
       resultHandler(emailSendResult);
     }
   }

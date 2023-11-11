@@ -8,12 +8,18 @@ import {
   useActionData,
 } from "@remix-run/react";
 import { useEffect, useRef } from "react";
+import {
+  renderTemplateForRemix as renderTemplate,
+  paymentDueTemplate as defaultTemplate,
+} from "templates/render";
+
 import invariant from "tiny-invariant";
 
-import { addReminder, getDebtAndReminders } from "~/models/debt.server";
+import { getDebtAndReminders } from "~/models/debt.server";
+import { createReminder } from "~/models/reminder.server";
 import { requireUserId } from "~/session.server";
 
-import { showDate } from "~/utils/date";
+import { formatDate } from "services/date/formatDate";
 
 export const loader = async ({ params, request }: LoaderArgs) => {
   const userId = await requireUserId(request);
@@ -28,40 +34,76 @@ export const loader = async ({ params, request }: LoaderArgs) => {
 
 export const action = async ({ params, request }: ActionArgs) => {
   const userId = await requireUserId(request);
-  
+
   invariant(params.debtId, "debtId not found");
 
   const formData = await request.formData();
-  const remindDate = formData.get("remindDate");
+  const notificationDate = formData.get("notificationDate");
+  const body = formData.get("body");
 
-  if (typeof remindDate !== "string" || remindDate.length === 0) {
+  if (typeof notificationDate !== "string" || notificationDate.length === 0) {
     return json(
-      { errors: { amount: null, title: "Reminder is required" } },
+      {
+        errors: {
+          body: null,
+          notificationDate: "Notification date is required",
+        },
+      },
+      { status: 400 },
+    );
+  }
+
+  if (typeof body !== "string" || body.length === 0) {
+    return json(
+      { errors: { body: "Body is required", notificationDate: null } },
       { status: 400 },
     );
   }
 
   // FIXME, secure this db action by user role
   // const userId = await requireUserId(request);
-  await addReminder({ id: params.debtId, userId, remindDate });
+  await createReminder({
+    debtId: params.debtId,
+    userId,
+    notificationDate: new Date(notificationDate),
+    body,
+  });
 
   return redirect("/debts/" + params.debtId + "/reminder");
 };
 
-export default function DebtDetailsPage() {
-  console.log("debts.debtId loading");
+export default function DebtReminderPage() {
+  console.log("DebtReminderPage loading");
   const data = useLoaderData<typeof loader>();
 
   const actionData = useActionData<typeof action>();
-  const remindDateRef = useRef<HTMLInputElement>(null);
+  const notificationDateRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (actionData?.errors?.title) {
-      remindDateRef.current?.focus();
+    if (actionData?.errors?.notificationDate) {
+      notificationDateRef.current?.focus();
+    } else if (actionData?.errors?.body) {
+      bodyRef.current?.focus();
     }
   }, [actionData]);
 
   const urlBack = `/debts/${data.debt.id}`;
+
+  const metadataData = data.debt.metadata
+    ? Object.fromEntries(
+        data.debt.metadata
+          .split("\n")
+          .map((line) => line.split(": "))
+          .filter((pair) => pair.length === 2), // Exclude lines that don't have a key-value pair
+      )
+    : null;
+
+  const etaTemplate = bodyRef.current ? bodyRef.current.value : defaultTemplate;
+  const etaTemplateRendered = renderTemplate({
+    templateString: etaTemplate,
+    data: metadataData,
+  });
 
   return (
     <div style={{ position: "relative" }}>
@@ -78,35 +120,66 @@ export default function DebtDetailsPage() {
         Done, go back to Debt
       </a>
       <p className="py-6">{data.debt.amount}</p>
-      
       <h3 className="text-xl font-bold">List of reminders</h3>
       <ul className="py-6">
-        {data.debt.reminders.length > 0
-         && 
-         data.debt.reminders.map(d => 
-         (<li key={`reminder-${d.notificationDate}`}>
-           {showDate(new Date(d.notificationDate))}
-         </li>))
-        }
+        {data.debt.reminders.length > 0 &&
+          data.debt.reminders.map((d, i) => (
+            <li key={`reminder-${i}-${d.notificationDate}`}>
+              {formatDate(new Date(d.notificationDate))}
+            </li>
+          ))}
       </ul>
       <hr className="my-4" />
       <Form method="post">
         <div>
+          <div>
+            <pre>{etaTemplateRendered}</pre>
+          </div>
+
+          <div>
+            <label className="flex w-full flex-col gap-1">
+              <span>Body: </span>
+              <textarea
+                ref={bodyRef}
+                defaultValue={etaTemplate}
+                name="body"
+                rows={8}
+                className="w-full flex-1 rounded-md border-2 border-blue-500 px-3 py-2 text-lg leading-6"
+                aria-invalid={actionData?.errors?.body ? true : undefined}
+                aria-errormessage={
+                  actionData?.errors?.body ? "body-error" : undefined
+                }
+              />
+            </label>
+            {actionData?.errors?.body ? (
+              <div className="pt-1 text-red-700" id="body-error">
+                {actionData.errors.body}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        <div>
           <label className="flex w-full flex-col gap-1">
-            <span>Reminder (date when you want it...): </span>
+            <span>Fecha de envío: </span>
             <input
-              ref={remindDateRef}
-              name="remindDate"
+              ref={notificationDateRef}
+              name="notificationDate"
+              defaultValue={formatDate(new Date())}
               className="flex-1 rounded-md border-2 border-blue-500 px-3 text-lg leading-loose"
-              aria-invalid={actionData?.errors?.title ? true : undefined}
+              aria-invalid={
+                actionData?.errors?.notificationDate ? true : undefined
+              }
               aria-errormessage={
-                actionData?.errors?.title ? "title-error" : undefined
+                actionData?.errors?.notificationDate
+                  ? "notificationDate-error"
+                  : undefined
               }
             />
           </label>
-          {actionData?.errors?.title ? (
-            <div className="pt-1 text-red-700" id="title-error">
-              {actionData.errors.title}
+          {actionData?.errors?.notificationDate ? (
+            <div className="pt-1 text-red-700" id="notificationDate-error">
+              {actionData.errors.notificationDate}
             </div>
           ) : null}
         </div>
@@ -115,19 +188,10 @@ export default function DebtDetailsPage() {
           type="submit"
           className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
         >
-          Add
+          Programar recordatorio
         </button>
-        next monday
-        in a week
-        in two weeks
-        every month first monday
-    
       </Form>
-
-      <a href="/reminder/new">
-        NOW
-      </a>
-
+      <a href="/reminder/new">NOW</a>
     </div>
   );
 }
